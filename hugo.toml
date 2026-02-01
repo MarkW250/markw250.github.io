@@ -1,0 +1,129 @@
+baseURL = 'https://example.org/'
+languageCode = 'en-za'
+title = 'Embedded Extraordinaire'
+theme = 'loveit'
+
+# Menu config
+[menu]
+[[menu.main]]
+weight = 1
+identifier = "posts"
+# you can add extra information before the name (HTML format is supported), such as icons
+pre = ""
+# you can add extra information after the name (HTML format is supported), such as icons
+post = ""
+name = "Posts"
+url = "/posts/"
+# title will be shown when you hover on this menu link
+title = "A list of all posts"
+[[menu.main]]
+weight = 2
+identifier = "tags"
+pre = ""
+post = ""
+name = "Tags"
+url = "/tags/"
+title = "Tags"
+[[menu.main]]
+weight = 3
+identifier = "categories"
+pre = ""
+post = ""
+name = "Categories"
+url = "/categories/"
+title = ""
+
+[params]
+# site default theme ["auto", "light", "dark"]
+defaultTheme = "auto"
+# public git repo url only then enableGitInfo is true
+gitRepo = ""
+# {{< version 0.1.1 >}} which hash function used for SRI, when empty, no SRI is used
+# ["sha256", "sha384", "sha512", "md5"]
+fingerprint = ""
+# {{< version 0.2.0 >}} date format
+dateFormat = "2006-01-02"
+# website title for Open Graph and Twitter Cards
+title = "Embedded Extraordinaire"
+# website description for RSS, SEO, Open Graph and Twitter Cards
+description = "Embedded Extraordinaire - Embedded Software Development, Done Right"
+# website images for Open Graph and Twitter Cards
+# images = ["/logo.png"] # TODO: Add logo
+
+# Author config
+[params.author]
+name = ""
+email = ""
+link = ""
+
+# Header config
+[params.header]
+# desktop header mode ["fixed", "normal", "auto"]
+desktopMode = "fixed"
+# mobile header mode ["fixed", "normal", "auto"]
+mobileMode = "auto"
+# {{< version 0.2.0 >}} Header title config
+[params.header.title]
+# URL of the LOGO
+logo = ""
+# title name
+name = "Embedded Extraordinaire Consulting"
+# you can add extra information before the name (HTML format is supported), such as icons
+pre = ""
+# you can add extra information after the name (HTML format is supported), such as icons
+post = ""
+# {{< version 0.2.5 >}} whether to use typeit animation for title name
+typeit = false
+
+# Home page config
+[params.home]
+# {{< version 0.2.0 >}} amount of RSS pages
+rss = 10
+# Home page profile
+[params.home.profile]
+enable = true
+# Gravatar Email for preferred avatar in home page
+# gravatarEmail = ""
+# URL of avatar shown in home page
+# avatarURL = "/images/avatar.png" # TODO: Add a picture here
+# {{< version 0.2.7 changed >}} title shown in home page (HTML format is supported)
+title = ""
+# subtitle shown in home page (HTML format is supported)
+subtitle = "Embedded Software Development - Done Right"
+# whether to use typeit animation for subtitle
+typeit = true
+# whether to show social links
+social = true
+# {{< version 0.2.0 >}} disclaimer (HTML format is supported)
+disclaimer = ""
+# Home page posts
+[params.home.posts]
+enable = true
+# special amount of posts in each home posts page
+paginate = 6
+# {{< version 0.2.0 deleted >}} replaced with hiddenFromHomePage in params.page
+# default behavior when you don't set "hiddenFromHomePage" in front matter
+defaultHiddenFromHomePage = false
+
+# Footer config
+[params.footer]
+enable = true
+# {{< version 0.2.0 >}} Custom content (HTML format is supported)
+custom = ''
+# {{< version 0.2.0 >}} whether to show Hugo and theme info
+hugo = false
+# {{< version 0.2.0 >}} whether to show copyright info
+copyright = true
+# {{< version 0.2.0 >}} whether to show the author
+author = false
+# Site creation time
+since = 2026
+# ICP info only in China (HTML format is supported)
+icp = ""
+# license info (HTML format is supported)
+# license = '<a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a>'
+
+[markup]
+[markup.highlight]
+style = 'doom-one'
+# noClasses = false
