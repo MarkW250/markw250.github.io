@@ -8,15 +8,25 @@ tags = ['c++']
 
 ## Introduction
 
-The _c++_ programming language provides some excellent tools for abstraction and
-code readability. It also enables easier use of some programming paradigms
-that are otherwise difficult to achieve in _c_ (a typical
-de facto weapon of choice for embedded programmers).
+The _c++_ programming language provides some excellent tools for abstraction,
+code readability (when done right), and quality of life enhancements for developers.
 
-With great power, however, comes great responsibility. Here are 10 "gotya's" that
-one should be aware of when using _c++_ for embedded development.
+With great power, however, comes great responsibility. As a embedded developers,
+there are some aspects that are often important to us that developers in other
+fields do not necessarily need to think about. Such as:
 
-## 1. Virtual Functions
+- **Memory constraints**: often one needs to implement an application on an MCU's that offers
+  a few hundred kilobytes or less.
+- **Hard real time**: sometimes, one either has to meat a very predictable dead line,
+  or a very tight dead line to do some processing.
+- **Power consumption**: the more cycles you do during your wake cycle, the more power you are using
+  which might mean the difference between 5 years and 50 years on a battery powered device.
+- **Predictability**: Some applications need to be very clear on what the code does, and leave
+  no ambiguity.
+
+With these aspects in mind, here are some "gotya's" of _c++_ that may be useful to keep
+
+## 1. V-Tables
 
 A common pattern in c++ is to define a purely virtual interface, and then inherit
 from it for your concrete implementation.
@@ -67,13 +77,13 @@ class Led
 
 The cost of this kind of abstraction is that any instance of a concrete implementation of
 the interface now contains a "vtable" with function pointers. This is how c++ inheritance
-works - the compiler essentially turns the class into a structure of pointers like you would
-in c to achieve a similar goal.
+works - the compiler essentially turns the class into a structure of pointers (in addition
+to member fields), like you would in c to achieve a similar goal.
 
 Why is this a "gotya"? One might not always realize the cost of speed for the indirection
-and the cost of memory usage for the vtable. It may not be of greater
-significance in a lot of projects, but sometimes, when each nanosecond of time and each
-byte of memory counts, one might consider a different approach.
+and the cost of memory usage for the vtable. It may not be of greater significance in a
+lot of projects, but sometimes, when each nanosecond of time and each byte of memory counts,
+one might consider a different approach.
 
 The important points to keep in mind are:
 
