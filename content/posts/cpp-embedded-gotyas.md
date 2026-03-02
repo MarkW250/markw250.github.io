@@ -11,20 +11,11 @@ tags = ['c++']
 The _c++_ programming language provides some excellent tools for abstraction,
 code readability (when done right), and quality of life enhancements for developers.
 
-With great power, however, comes great responsibility. As a embedded developers,
-there are some aspects that are often important to us that developers in other
-fields do not necessarily need to think about. Such as:
+There are some caveats, however. Some of the power that _c++_ enables is provided on
+top of abstraction that might be important for low level big wranglers to be aware about.
 
-- **Memory constraints**: often one needs to implement an application on an MCU's that offers
-  a few hundred kilobytes or less.
-- **Hard real time**: sometimes, one either has to meat a very predictable dead line,
-  or a very tight dead line to do some processing.
-- **Power consumption**: the more cycles you do during your wake cycle, the more power you are using
-  which might mean the difference between 5 years and 50 years on a battery powered device.
-- **Predictability**: Some applications need to be very clear on what the code does, and leave
-  no ambiguity.
-
-With these aspects in mind, here are some "gotya's" of _c++_ that may be useful to keep
+This article touches on 10 issues that might surprise embedded firmware developers who
+are used to the "directness" of _c_.
 
 ## 1. V-Tables
 
@@ -56,56 +47,21 @@ class ConcreteGpio : public IGpio
         void init() override;
         void setState(State newState) override;
 };
-
-// In Led.cpp
-class Led
-{
-    public:
-        void init(IGpio& gpio)
-        {
-          m_gpio = gpio;
-        }
-
-        void turnOn()
-        {
-            m_gpio.setState(State::On);
-        }
-    private:
-        IGpio& m_gpio;
-};
 ```
 
-The cost of this kind of abstraction is that any instance of a concrete implementation of
-the interface now contains a "vtable" with function pointers. This is how c++ inheritance
-works - the compiler essentially turns the class into a structure of pointers (in addition
-to member fields), like you would in c to achieve a similar goal.
+The cost of this abstraction is a "v-table". For each _implementation_ of `IGpio`, 
+the compiler will create a list of addresses of functions (the "vector table" or 
+"vtable"), and each _instance_ of the class that implements will have an address 
+to this list of addresses.
 
-Why is this a "gotya"? One might not always realize the cost of speed for the indirection
-and the cost of memory usage for the vtable. It may not be of greater significance in a
-lot of projects, but sometimes, when each nanosecond of time and each byte of memory counts,
-one might consider a different approach.
+This means, each instance will have a "hidden" 4 byte cost (for a 32-bit MCU), and
+for each class that implements it, there will be a _4 * i_ bytes cost (where _i_ 
+is the number of implementations).
 
-The important points to keep in mind are:
+The cost is generally small, and do know that some compilers are pretty darn good 
+at optimizing away "vtables" in certain cases. But it is still good to be aware
+that it exists.
 
-- How many methods does the interface define? Roughly, for a 32-bit MCU, each interface will increase
-  the vtable of each instance by 4 bytes.
-- How many of these instances am I expected to have? If you're going to have 10 GPIO instances,
-  each with 4 methods (init, setState, getState and toggleState); that's `4 * 4 * 10 = 160` bytes.
-  Is this worth a simple GPIO abstraction?
-- Am I calling a virtual method in a time critical path? Maybe one or even two indirections
-  are fine, but if you use the pattern overzealously, you may end up with a slow application.
-
-If these are problems for you, one can consider using an alternative such as
-a classical facade to abstract the hardware:
-
-```c
-// Gpio.hpp
-// Initializes all GPIO's for the project
-extern void Gpio_Init();
-// There are no "instances" of GPIO objects. Instead, they would
-// be managed either by a classic switch case statement (for example).
-extern void Gpio_SetState(GpioInstance instance, State newState);
-```
 
 ## 2. Template Bloat
 
@@ -114,8 +70,15 @@ helper functions that can reduce code duplication, or the need for function over
 when you need a function to act on multiple types.
 
 However, template bloat _can be_ real if you get too liberal with your template usage.
+Again, compilers can be pretty good at optimizing templates as well, but remember
+to always measure!
 
 ## 3. Static Construction
+
+This can be a particularly nasty one, particularly if you find yourself in a project
+that, for some reason, needs a custom linker and startup code. 
+
+....
 
 ## 4. Debugging Made Hard
 
