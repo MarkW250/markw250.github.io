@@ -67,7 +67,7 @@ mobileMode = "auto"
 # URL of the LOGO
 logo = ""
 # title name
-name = "Embedded Extraordinaire Consulting"
+name = "Embedded Extraordinaire"
 # you can add extra information before the name (HTML format is supported), such as icons
 pre = ""
 # you can add extra information after the name (HTML format is supported), such as icons
@@ -89,7 +89,7 @@ enable = true
 # {{< version 0.2.7 changed >}} title shown in home page (HTML format is supported)
 title = ""
 # subtitle shown in home page (HTML format is supported)
-subtitle = "Embedded Software Development - Done Right"
+subtitle = "Embedded Software Development - Done Extraordinarily"
 # whether to use typeit animation for subtitle
 typeit = true
 # whether to show social links
