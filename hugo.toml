@@ -127,3 +127,7 @@ icp = ""
 [markup.highlight]
 style = 'doom-one'
 # noClasses = false
+
+[caches]
+  [caches.images]
+    dir = ':cacheDir/images'

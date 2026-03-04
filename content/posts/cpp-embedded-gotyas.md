@@ -1,6 +1,6 @@
 +++
-date = '2026-01-29T19:02:02+01:00'
-draft = true
+date = '2026-03-04T20:00:00+01:00'
+draft = false
 title = "Ten Gotya's When Using c++ for Embedded Development"
 author = 'Mark Wilson'
 tags = ['c++']
