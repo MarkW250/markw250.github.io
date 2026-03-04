@@ -1,7 +1,7 @@
 +++
 date = '2026-03-04T20:00:00+01:00'
 draft = false
-title = "Five Gotcha's When Using `C++` for Embedded Development"
+title = 'Five "Gotchas" When Using C++ for Embedded Development'
 author = 'Mark Wilson'
 tags = ['C++']
 +++
