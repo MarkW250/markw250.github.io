@@ -1,37 +1,38 @@
 +++
 date = '2026-03-04T20:00:00+01:00'
 draft = false
-title = "Five Gotya's When Using c++ for Embedded Development"
+title = "Five Gotcha's When Using `C++` for Embedded Development"
 author = 'Mark Wilson'
-tags = ['c++']
+tags = ['C++']
 +++
 
 ## Introduction
 
-The _c++_ programming language provides some excellent tools for abstraction,
-code readability (when done right), and quality of life enhancements for developers.
+The `C++` programming language provides excellent tools for abstraction, code readability
+(when used correctly), and quality-of-life improvements for developers.
 
-There are some caveats, however. Some of the power that _c++_ enables is provided on
-top of hidden abstraction that are important for low-level-bit-wranglers to be aware about.
+There are some caveats, however. Some of the power that `C++` provides is built on
+hidden abstractions that low-level-bit-wranglers should be aware of.
 
-This article touches on 5 issues that might surprise embedded firmware developers who
-may be starting their journey in _c++_.
+This article highlights five issues that might surprise embedded firmware developers
+who are starting their journey with `C++`.
 
 ## 1. V-Tables {#v-tables}
 
-A common pattern in c++ is to define a purely virtual interface, and then inherit
-from it for your concrete implementation.
 
-This is a neat abstraction such that for example a GPIO interface class can either be injected
-as a dependency to other classes, or other modules can "get" an instance of GPIO from
-some global GPIO manager.
+A common pattern in `C++` is to define a purely virtual interface and then inherit
+from it for a concrete implementation.
 
-This also enables easy testing since any module depending on the GPIO interface can
-mock or fake a concrete implementation to use for its unit tests.
+This is a useful abstraction: for example, a GPIO interface class can be injected
+as a dependency into other classes, or other modules can obtain an instance of
+GPIO from a global manager.
+
+It also makes testing easier, since any module that depends on the GPIO interface
+can mock or fake a concrete implementation for unit tests.
 
 For example:
 
-```c++
+```C++
 // In IGpio.hpp:
 class IGpio
 {
@@ -52,16 +53,15 @@ class ConcreteGpio : public IGpio
 };
 ```
 
-The cost of this abstraction is a "v-table". For each _implementation_ of `IGpio`, 
-the compiler will create a list of addresses of functions (the "vector table" or 
-"vtable"), and each _instance_ of the class that implements will have an address 
-to this list of addresses.
 
-This means, each instance will have a "hidden" 4 byte cost (for a 32-bit MCU), and
-for each class that implements it, there will be a _4 * i_ bytes cost (where _i_ 
-is the number of implementations).
+The cost of this abstraction is a vtable. For each _implementation_ of `IGpio`,
+the compiler generates a table of function addresses (the virtual table or vtable),
+and each _instance_ of the class contains a pointer to that table.
 
-For the example above, the object generally is laid out in memory like this:
+This means each instance typically has an implicit 4-byte overhead on a 32-bit MCU,
+and each implementing class requires its own vtable stored in memory.
+
+For the example above, the object is generally laid out in memory like this:
 ```
 Vector table for ConcreteGpio:
 0x00001000: Address of ConcreteGpio::Init()
@@ -73,31 +73,33 @@ An instance of ConcreteGpio:
 ...
 ```
 
-The cost is generally small, and know that some compilers are pretty darn good 
-at optimizing away "vtables" in certain cases. But it is still good to be aware
-that it exists.
+
+The cost is generally small, and some compilers can optimize away vtables in
+certain cases. Still, it's good to be aware that they exist.
 
 ## 2. Template Bloat
 
-Templates are a powerful tool. Among other uses, they can be used to make very convenient
-helper functions that can reduce code duplication, or the need for function overloading
-when you need a function to act on multiple types.
 
-Modern compilers are also generally _really_ good at optimizing template code. However,
-template bloat can indeed be a problem - if code size is a potential constraint (as it 
-normally is on embedded devices), its always a code idea to try keep track of your code 
-size and try to spot when a change set suspiciously increases code size significantly.
+Templates are a powerful tool. They can produce convenient helper functions that
+reduce code duplication and avoid function overloading when a function must work
+with multiple types.
+
+Modern compilers are generally very good at optimizing template code. However,
+template bloat can be a problem: if code size is constrained (as it usually is on
+embedded devices), it's a good idea to track code size and watch for changesets
+that significantly increase it.
 
 Measure, measure, measure!
 
 ## 3. Construction of Static and Global Objects
 
-This can be a particularly nasty one, particularly if you find yourself in a project
-that, for some reason, needs a custom linker and startup code. 
 
-A constructor of a c++ object runs when that object comes into scope. For example:
+This can be particularly troublesome if your project uses a custom linker or
+custom startup code.
 
-```c++
+A constructor of a `C++` object runs when that object comes into scope. For example:
+
+```C++
 
 #include <cstdio>
 
@@ -117,10 +119,11 @@ void MyFunction()
 
 ```
 
-What happens, though, if you have an object declared outside of a function scope (making it a 
+
+What happens if you declare an object outside of any function scope (making it a
 static or global object)?
 
-```c++
+```C++
 void MyFunction()
 {
     MyClass myObject; // <-- "Hello!" gets printed when the function is entered.
@@ -130,69 +133,67 @@ MyClass myStaticObject; // When does the constructor run for this object?
 
 ```
 
-The answer is that _c++_ requires a runtime environment that will run global object constructors. 
-Just like _c_ requires the runtime environment that will zero out `.bss` and initialize `.data` 
-sections. And just like _c_, if you find yourself with a custom startup code and linker file, 
-you need to take that into consideration. Often, you would use whatever linker and startup 
-code is provided by your toolchain, and if it supports compiling _c++_ then it should provide
-appropriate startup code auto-magically.
 
+The answer is that `C++` requires a runtime environment to run global object
+constructors—just as `C` requires a runtime to zero `.bss` and initialize `.data`.
+If you use custom startup code and a custom linker file, you must ensure global
+constructors are handled. Usually the toolchain's default startup code provides
+this automatically when it supports `C++`.
 
-Now the main "gotya" for embedded folks here is that there is no specified order in which these 
-objects will be constructed. 
-Therefore, it is really important to keep in mind that if the construction of object relies on a 
-different object already being constructed (or some hardware to already be initialized), then do not 
-make these objects statically construct! In fact, I would argue that it is best to stay away from 
-static objects in general. More on that in an upcoming article.
+The main "gotcha" for embedded developers is that the `C++` standard does not specify
+the order in which global objects across translation units are constructed. If the
+construction of one object depends on another object or on initialized hardware,
+avoid static initialization. In general, prefer explicit initialization rather than
+relying on static global constructors.
 
 ## 4. Debugging Made Hard (Sometimes)
 
-I have mentioned more than once in this article that modern compilers are generally really good
-at optimizing the logical abstractions that _c++_ provides. This is both a blessing and a curse.
 
-If you rely on the optimizer to optimize your fancy pants _c++_ code because you have resource
-constraints, then you might get to a point where you cannot build your project with
-no optimizations (i.e. a full debug build). If you ever need to debug optimized _c++_ code, 
-you are in for a fun time. From templates being inlined, to the code jumping to constructors and
-destructors, it is sometimes difficult to step through the code sanely. Granted, it can
-be similar case with _c_, and an experienced developer can navigate the optimizations by
-inspecting the assembly code together with the source code. Or, good old "printf" debugging
-could work if your environment provides some kind of output.
+Modern compilers are generally excellent at optimizing the abstractions that `C++`
+provides. This is both a blessing and a curse.
+
+If you rely on optimizations because of resource constraints, you may be unable to
+build a full debug (no-optimization) version of your project. Debugging optimized
+`C++` code can be difficult: templates may be inlined, and execution may jump between
+arbitrary constructors or destructors (or indeed just completely skip them), 
+which makes stepping through code challenging. Granted, the same can
+occur in `C`, and an experienced developer can navigate the optimizations by
+inspecting the assembly code together with the source code. Or, one can fall back to 
+good old "printf" debugging.
 
 ## 5. Constructors and Destructors
 
-At first glance, _c++_ constructors and destructors are pretty straight forward: Constructor
-is called when the object is created using the `new` operator or at the time it is declared, 
-and the destructor is called when it is either deleted using the `delete` operator or when 
-the object goes out of scope.
 
-However, things can get complicated quickly. 
+At first glance, `C++` constructors and destructors are straightforward: a constructor
+is called when an object is created (for example, with `new` or when it is declared),
+and a destructor is called when the object is deleted or goes out of scope.
 
-Firstly, when you deal with inheritance, and you construct a child class, the parent class's
-constructor is implicitly called. Sounds reasonable, but believe me this can get out of hand
-and often even a shallow chain of constructors can quickly eat up precious working mental 
-memory when someone tries to decipher the code. This is one of the many reasons why I would 
-recommend keeping inheritance extremely shallow when designing your code - preferably limiting 
-it to defining interfaces (like shown above in [point 1]({{< relref "#v-tables" >}})).
+However, things can get complicated quickly.
 
-Secondly, there are many types of constructors defined by the _c++_ spec: in addition to the
-"normal" constructors, there are move constructors, copy constructors, copy assignment and
-move assignment. These become particularly important to know about as soon as a class
-is managing a resource. In this case, the _c++_ core guidelines offer 
+
+First, with inheritance, constructing a derived class implicitly calls the base
+class constructor. While this is sensible, long chains of constructors can be
+hard to follow, so prefer shallow inheritance hierarchies and use inheritance
+primarily for interfaces (as shown above in [point 1]({{< relref "#v-tables" >}})).
+
+Second, in addition to "normal" constructors,the `C++` language defines several kinds of 
+constructors and assignment operations: copy, move, copy-assignment, and move-assignment.
+These are especially important when a class manages resources. The `C++` core guidelines offer 
 [good rules to follow](https://en.cppreference.com/w/cpp/language/rule_of_three.html).
 
-Why is this a "gotya" specifically for embedded developers? Well, often we are often thinking
-about how a compiler will create the assembly and how it manages objects in memory so that
-we have an idea of code size and code speed. For example, in _c_, it is very clear that
-when you pass a `struct` to a function, a copy of the struct will be made. If you want 
-to use less stack and save some processing cycles, pass a pointer to the `struct`. Its 
-the same with all other types in _c_. In _c++_, the abstraction through objects and their
-various constructors (and the way one can customize them), it is not always as clear cut. 
+
+Why is this a "gotcha" for embedded developers? We often think about how the compiler
+generates assembly and manages objects in memory in order to reason about the memory
+usage and time a function will spend doing a function.For example, in `C`, it is clear
+that passing a struct or other type to a function makes a copy; and to avoid the copy you
+pass a pointer. In `C++`, object abstractions, constructors, and copy/move semantics
+can make reasoning about what the compiler will produce a bit more tricky.
 
 ## Conclusion
 
-This article points out some features and characteristics of _c++_ that are particularly useful to
-be aware about in the context of an embedded project. Generally, however, these can be overcome,
-and with proper discipline and training, _c++_ can be an incredible enabler in the context
-of embedded projects.
+
+This article highlights features and characteristics of `C++` that are especially
+important to consider in embedded projects. With discipline and good practices,
+these issues can be managed, and `C++` can be a powerful enabler for embedded
+development.
 
