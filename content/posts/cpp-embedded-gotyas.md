@@ -1,7 +1,7 @@
 +++
 date = '2026-03-04T20:00:00+01:00'
 draft = false
-title = "Ten Gotya's When Using c++ for Embedded Development"
+title = "Five Gotya's When Using c++ for Embedded Development"
 author = 'Mark Wilson'
 tags = ['c++']
 +++
@@ -14,7 +14,7 @@ code readability (when done right), and quality of life enhancements for develop
 There are some caveats, however. Some of the power that _c++_ enables is provided on
 top of hidden abstraction that are important for low-level-bit-wranglers to be aware about.
 
-This article touches on 10 issues that might surprise embedded firmware developers who
+This article touches on 5 issues that might surprise embedded firmware developers who
 may be starting their journey in _c++_.
 
 ## 1. V-Tables {#v-tables}
