@@ -4,6 +4,8 @@ draft = false
 title = 'Five "Gotchas" When Using C++ for Embedded Development'
 author = 'Mark Wilson'
 tags = ['C++']
+[params]
+    graphcommentid = 'cpp_gotchyas'
 +++
 
 ## Introduction
